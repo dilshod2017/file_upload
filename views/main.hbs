@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<style>
+    body {
+        width: 30vw;
+        display: flex;
+        margin: 0 auto;
+    }
+    form {
+        display: flex;
+        margin: 0 auto;
+        flex-flow: column;
+    }
+
+    textarea {
+        width: 200px;
+        height: 50px;
+        display: block
+    }
+    .div{
+        position: relative;
+        padding: 50px;
+        border: 1px solid red;
+    }
+    .btn {
+        cursor: pointer;
+        padding-bottom: 20px;
+    }
+   
+</style>
+<body>
+    <form action="/" id="form" method="POST" class='form' enctype='multipart/form-data'>
+        <div class="div-out" id="0">
+            <div class="div">
+                <textarea name="content-0" id="blog_content-0" cols="10" rows="5"></textarea>
+                <input name='photo-0' class="photo-0" type="file">
+            </div>
+
+        </div>
+            <a class="add-btn btn">Add new photo frame</a>
+            <button>Submit</button>
+        </div>
+    </form>
+<script src="https://code.jquery.com/jquery-3.4.0.min.js"
+    integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
+    <script src="/script.js"></script>
+</body>
+</html>

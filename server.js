@@ -1,3 +1,4 @@
+require("dotenv/config");
 const express = require("express");
 const exphdlbars = require("express-handlebars");
 const multer = require('multer');
@@ -14,7 +15,7 @@ aws.config.update({
     accessKeyId: "AKIASOEWKNUKEXOJMSI5",
     region: 'us-east-2' // region of your bucket
 });
-const s3 = new aws.S3();
+// const s3 = new aws.S3();
 
 
 // const singleUpload = upload.single('image')
@@ -25,21 +26,29 @@ let pre_params = {
     Key: ""
 }
 var date = Date.now();
-app.use(body_parser.urlencoded({extended: true}));
-const upload = multer({
-    storage: multerS3({
-        s3,
-        bucket: pre_params.Bucket,
-        acl: 'public-read',
-        metadata: function (req, file, cb) {
-            cb(null, { fieldName: file.fieldname});
-        },    
-        key: function (req, file, cb) {
-            cb(null, file.originalname+"-"+Date.now().toString()
-            +path.extname(file.originalname));
-        }    
-    })    
-})    
+app.use(body_parser.json({ limit: "50mb" }));
+var urlencodedParser = body_parser.urlencoded({
+    extended: true,
+    parameterLimit: 50000
+});
+app.use(function (req, res, next) {
+    console.log('Request URL: ', req.originalUrl);
+    next();
+});
+// const upload = multer({
+//     storage: multerS3({
+//         s3,
+//         bucket: pre_params.Bucket,
+//         acl: 'public-read',
+//         metadata: function (req, file, cb) {
+//             cb(null, { fieldName: file.fieldname});
+//         },    
+//         key: function (req, file, cb) {
+//             cb(null, file.originalname+"-"+Date.now().toString()
+//             +path.extname(file.originalname));
+//         }    
+//     })    
+// })    
 
 
 
@@ -62,14 +71,14 @@ var connection = mysql.createConnection({
 app.get("/",(req, res)=>{
     res.render("main");
 })
-app.post('/', upload.single("photo"), (req, res)=>{
-    let q = req.file.key;
-    connection.query("insert into test_1.photo (image) values(?)", [q], (err, result) => {
-        if(err) throw err;
-        // res.json(result);
-        res.redirect("/done");
-    });
-})
+// app.post('/', upload.single("photo"), (req, res)=>{
+//     let q = req.file.key;
+//     connection.query("insert into test_1.photo (image) values(?)", [q], (err, result) => {
+//         if(err) throw err;
+//         // res.json(result);
+//         res.redirect("/done");
+//     });
+// })
 var fs = require('fs');
 app.get('/done',(req, res)=>{
     connection.query(" select image from test_1.photo",(err, result)=>{
@@ -84,9 +93,40 @@ app.get('/done',(req, res)=>{
     });
 });
 
-app.post("/test",(req, res)=>{
 
-    res.send(req.body)
+// const storage = multer.diskStorage({
+//     destination: function (req, file, cb) {
+//         cb(null, './uploads');
+//     },
+//     filename: function (req, file, cb) {
+//         cb(null, file.fieldname+'-'+Date.now()+path.extname(file.originalname))
+//     }
+// })
+
+// const upload = multer({
+//     storage: storage, 
+//     limits: {
+//         fileSize: 1024 * 1024 * 5
+//     }
+// })
+app.post("/test",urlencodedParser, (req, res)=>{
+    var storage = multer.diskStorage({
+        destination: function (req, file, callback) {
+            callback(null, './uploads');
+        },
+        filename: function (req, file, callback) {
+            var fname = file.fieldname + '-' + Date.now() + path.extname(file.originalname);
+            callback(null, file.originalname+'.'+Date.now()+path.extname(file.originalname));
+        }
+    });
+    var upload_photos = multer({
+        storage: storage
+    }).array('img', 10);
+    upload_photos(req, res, function (err) {
+        if(err) throw err;
+       console.log(req.files);
+    });
+
 })
 
 

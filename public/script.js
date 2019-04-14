@@ -25,10 +25,10 @@ $(document).ready(()=>{
     
     $(".add-btn").click(()=>{
         ++count;
-        textarea.setAttribute("class", `content-${count}`);
-        textarea.setAttribute("name", `content-${count}`);
-        input.setAttribute("class", `photo-${count}`);
-        input.setAttribute("name", `photo-${count}`);
+        textarea.setAttribute("class", `content_${count}`);
+        textarea.setAttribute("name", `content_${count}`);
+        input.setAttribute("class", `photo_${count}`);
+        input.setAttribute("name", `photo_${count}`);
         div_out.append(div);
         div.append(textarea);
         div.append(link_rem_text);
@@ -67,39 +67,31 @@ $(document).ready(()=>{
         readURL(e.currentTarget, self);        
     });
     
-    form.submit((event)=>{
+    $("#form").submit((event)=>{
         event.preventDefault();
-        let map = [];
-        let input = $("input");
-        let text_area = $("textarea");
-        $.each(text_area, (indx, inpt)=>{
-            // console.log(inpt.value);
-            map.push({
-                textarea: inpt.value,
-                img: {}
-            })
+        var payload = new FormData();
+        var input = $("input");
+        var textarea = $("textarea");
+        $.each(input,(index, value)=>{
+            payload.append("img", value.files[0]);
         });
 
-        console.log($("input"));
-        
-        // let this_form = $("form").get(0);
-        // console.log("form",this_form);
-        // $.ajax({
-        //     url: '/',
-        //     type: 'POST',
-        //     contentType: false,
-        //     processData: false,
-        //     cache: false,
-        //     data: new FormData(this_form),
-        //     success: function () {
-        //         alert('Success');
-        //     },
-        //     error: function (error) {
-        //         console.log(error);
-                
-        //     }
-        // });
-        
+        $.each(textarea, (index, val)=>{
+            payload.append(`${val.name}`, val.value);
+        })
+        payload.append("count", count);
+        $.ajax({
+            url: '/test',
+            type: 'post',
+            data: payload,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                console.log("data");
+                // location.reload();
+            }
+        });
+      
     })
 });//end of document ready-----------------------------------------------
 
@@ -113,7 +105,7 @@ function readURL(input, self) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
         reader.onload = function (e) {
-           self.after(`<img src="${e.target.result}" with="450px" height="300px"/>`);
+           self.after(`<img src="${e.target.result}" with="350px" height="200px"/>`);
         }
         reader.readAsDataURL(input.files[0]);
     } 

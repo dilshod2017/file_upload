@@ -11,18 +11,19 @@ const btoa = require("btoa");
 var app = express();
 
 aws.config.update({
-    secretAccessKey: "KD6SuX9Vsy6GtaSjDrM1STdWYcnYaJGyJiFyavLf",
-    accessKeyId: "AKIASOEWKNUKEXOJMSI5",
+    secretAccessKey: "",
+    accessKeyId: "",
     region: 'us-east-2' // region of your bucket
 });
 // const s3 = new aws.S3();
+// 
+const s3 = new aws.S3();
 
 
 // const singleUpload = upload.single('image')
-// access key    AKIASOEWKNUKEXOJMSI5
-// secret key KD6SuX9Vsy6GtaSjDrM1STdWYcnYaJGyJiFyavLf
+
 let pre_params = {
-    Bucket: "publicfolder1234/folder",
+    Bucket: "/folder",
     Key: ""
 }
 var date = Date.now();

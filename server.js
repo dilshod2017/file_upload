@@ -16,7 +16,7 @@ const s3 = new aws.S3();
 // const singleUpload = upload.single('image')
 
 let pre_params = {
-    Bucket: "publicfolder1234/folder",
+    Bucket: "/folder",
     Key: ""
 }
 var date = Date.now();

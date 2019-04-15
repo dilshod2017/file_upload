@@ -17,36 +17,49 @@
         margin: 0 auto;
         flex-flow: column;
     }
-
-    textarea {
-        width: 200px;
-        height: 50px;
-        display: block
+    ul {
+        display: grid;
     }
-    .div{
+    li {
+        display: grid;
+        border: 4px solid red;
         position: relative;
-        padding: 50px;
-        border: 1px solid red;
     }
-    .btn {
+    .span {
+        width: 20px;
+        height:20px;
+        display: block;
+        position: relative;
+        top: 0;
+        right: -240px;
+        background: gray;
         cursor: pointer;
-        padding-bottom: 20px;
+
     }
+    input {
+        padding: 10px;
+    }
+    a{
+        padding: 5px;
+     }
    
 </style>
 <body>
-    <form action="/test" id="form" method="POST" class='form' enctype='multipart/form-data'>
-        <div class="div-out" id="1">
-            <div class="div">
-                <textarea name="content_1" id="blog_content_1" cols="10" rows="5"></textarea>
-                <input name='photo_1' class="photo_1" type="file">
-            </div>
-
-        </div>
-            <a class="add-btn btn">Add new photo frame</a>
-            <button>Submit</button>
-        </div>
-    </form>
+    <form action="/test" id="form" method="POST" class='1' enctype='multipart/form-data'>
+        <ul class="1" id="1" name="1">
+            <li class="li-text-1">
+                <span class="span">X</span>
+                <textarea name="text_1" id="text_1" class="text_1" cols="10" rows="5"></textarea>
+            </li>
+            <li class="li-file-1">
+                <span class="span">X</span>
+                <input name='img_1' class="img_1" type="file">
+            </li>
+        </ul>
+        <a href="#" class="add-photo">Add img</a>
+        <a href="#" class="add-text">Add text</a>
+        <button>Submit</button>
+     </form>
 <script src="https://code.jquery.com/jquery-3.4.0.min.js"
     integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
     <script src="/script.js"></script>

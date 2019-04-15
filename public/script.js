@@ -1,67 +1,66 @@
 $(document).ready(()=>{
     
-    const form = $(".form");
-    const div_out = $(".div-out");
-    // var c = div_out.data("count");
-    var c = div_out.prop("id");
-    var count = parseInt(c,10);
-    let div = document.createElement('div');
-    div.setAttribute("class", "div");
-    let textarea = document.createElement("textarea");
-    textarea.setAttribute("cols", 10);
-    textarea.setAttribute("rows", 5);
-    let link_rem_text = document.createElement("a");
-    link_rem_text.setAttribute("class", "remove-text btn");
-    let link_rem_file = document.createElement("a");
-    link_rem_file.setAttribute("class", "remove-file btn");
-    let input = document.createElement("input");
-    input.setAttribute("type", "file");
-    input.setAttribute("id", `file`);
-    let img = document.createElement("img");
-    img.setAttribute("class","image-preview");
-    img.setAttribute("alt","image-preview");
-    link_rem_file.innerHTML = "remove file";
-    link_rem_text.innerHTML = "remove text";
-    
-    $(".add-btn").click(()=>{
-        ++count;
-        textarea.setAttribute("class", `content_${count}`);
-        textarea.setAttribute("name", `content_${count}`);
-        input.setAttribute("class", `photo_${count}`);
-        input.setAttribute("name", `photo_${count}`);
-        div_out.append(div);
-        div.append(textarea);
-        div.append(link_rem_text);
-        div.append(input);
-        div.append(img);
-        div.append(link_rem_file);
-        div_out.prop("id", count);
-    });
-    
-    div_out.on('click','a.remove-text',()=>{
-        var parent = $("a.remove-text").parent();
-        // console.log(parent);
-        parent.find("textarea").remove();
-        parent.find("a.remove-text").remove();  
-        check_empty(parent);      
-    })
-    
-    div_out.on('click','a.remove-file',()=>{
-        var parent = $("a.remove-file").parent();
-        // console.log(parent);
-        parent.find("input").remove();
-        parent.find('img').remove();
-        parent.find("a.remove-file").remove();  
-        check_empty(parent);      
-    });
-    // $("input").change((e)=>{
-    //     let i = e.currentTarget.attributes.class.value;
-    //     let self = $(`.${i}`);
-    //     readURL(e.currentTarget, self);        
+    let form = $(".form");
+    let ul = $("ul");
+    let c = ul.prop("id"); // id for fle input
+    let q = ul.prop("class"); //name for text
+    var count_c = parseInt(c,10);
+    var count_q = parseInt(q,10);
+
+    let li;
+    let input;
+    let text_ar;
+    let span;
+    let map = [
+        "li-text-1",
+        "li-file-1"
+    ];
+     $(".add-photo").click(()=>{
+        ++count_c;     
+        li             = document.createElement("li");
+        input          = document.createElement("input");
+        span           = document.createElement("span")
+        span.innerHTML = "X";
+        span.setAttribute("class","span");
+        li.setAttribute("class","li-file-"+count_c);
+        input.setAttribute("type","file");
+        input.setAttribute("name","img-"+count_c);
+        input.setAttribute("class","img-"+count_c);
         
-    // });
+        li.append(span);
+        li.append(input);
+        ul.append(li);
+        ul.prop("id",count_c);
+        map.push("li-file-"+count_c);
+     });
+    $(".add-text").click(()=>{
+        ++count_q;
+        li             = document.createElement("li");
+        span           = document.createElement("span")
+        span.innerHTML = "X";
+        text_ar        = document.createElement("textarea");
+        span.setAttribute("class","span");
+        li.setAttribute("class", "li-text-" + count_q);
+        text_ar.setAttribute("class", "text_"+count_q);
+        text_ar.setAttribute("name", "text_"+count_q);
+       
+        li.append(span);
+        li.append(text_ar);
+        ul.append(li);
+        ul.prop("class", count_q);
+        map.push("li-text-"+count_q);
+    });
     
-    div_out.on("change", "input",(e)=>{
+    ul.delegate("li span","click",(e)=>{ 
+        let elem = e.currentTarget.parentElement;
+        elem.remove();
+        console.log(elem.className);
+        let new_map = map.filter((item)=>!item.includes(elem.className));
+        console.log(new_map);
+    });
+
+
+    ul.on("change", "input", (e)=>{
         let i = e.currentTarget.attributes.class.value;
         let self = $(`.${i}`);
         readURL(e.currentTarget, self);        
@@ -73,13 +72,17 @@ $(document).ready(()=>{
         var input = $("input");
         var textarea = $("textarea");
         $.each(input,(index, value)=>{
-            payload.append("img", value.files[0]);
+            if(value.files[0])
+                payload.append("img", value.files[0]);
         });
 
         $.each(textarea, (index, val)=>{
-            payload.append(`${val.name}`, val.value);
+            if(val.value.trim() !== ""){
+                payload.append(`${val.name}`, val.value);
+            }
         })
-        payload.append("count", count);
+        payload.append("count_img", count_c);
+        payload.append("count_text", count_q);
         $.ajax({
             url: '/test',
             type: 'post',
@@ -88,7 +91,6 @@ $(document).ready(()=>{
             processData: false,
             success: function (data) {
                 console.log("data");
-                // location.reload();
             }
         });
       
@@ -109,4 +111,8 @@ function readURL(input, self) {
         }
         reader.readAsDataURL(input.files[0]);
     } 
+}
+
+const remove_elem=(class_name)=>{
+    $(`.${class_name}`).remove();
 }

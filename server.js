@@ -10,23 +10,19 @@ const mysql = require("mysql2");
 const btoa = require("btoa");
 var app = express();
 
+ 
 aws.config.update({
-    secretAccessKey: "",
-    accessKeyId: "",
+    secretAccessKey: `${process.env.AWS_SECRETE_KEY}`,
+    accessKeyId: `${process.env.AWS_ACCESS_KEY}`,
     region: 'us-east-2' // region of your bucket
 });
-// const s3 = new aws.S3();
-// 
+
 const s3 = new aws.S3();
 
-
-// const singleUpload = upload.single('image')
-
 let pre_params = {
-    Bucket: "/folder",
+    Bucket: process.env.AWS_BUCKET_NAME,
     Key: ""
 }
-var date = Date.now();
 app.use(body_parser.json({ limit: "50mb" }));
 var urlencodedParser = body_parser.urlencoded({
     extended: true,
@@ -72,19 +68,10 @@ var connection = mysql.createConnection({
 app.get("/",(req, res)=>{
     res.render("main");
 })
-// app.post('/', upload.single("photo"), (req, res)=>{
-//     let q = req.file.key;
-//     connection.query("insert into test_1.photo (image) values(?)", [q], (err, result) => {
-//         if(err) throw err;
-//         // res.json(result);
-//         res.redirect("/done");
-//     });
-// })
-var fs = require('fs');
+
 app.get('/done',(req, res)=>{
     connection.query(" select image from test_1.photo",(err, result)=>{
         if(err) throw err;
-        // res.render("post");
         let params = {...pre_params,Key:result[0].image};
         console.log(params);
         s3.getObject(params,(err, data)=>{
@@ -110,22 +97,39 @@ app.get('/done',(req, res)=>{
 //         fileSize: 1024 * 1024 * 5
 //     }
 // })
+var storage = multerS3({
+    s3,
+    bucket: process.env.AWS_BUCKET_NAME,
+    acl: 'public-read',
+    metadata: function (req, file, cb) {
+        cb(null, { fieldName: file.fieldname});
+    },    
+    key: function (req, file, cb) {
+        cb(null, file.originalname+"-"+Date.now()+path.extname(file.originalname));
+    }    
+});
+
 app.post("/test",urlencodedParser, (req, res)=>{
-    var storage = multer.diskStorage({
-        destination: function (req, file, callback) {
-            callback(null, './uploads');
-        },
-        filename: function (req, file, callback) {
-            var fname = file.fieldname + '-' + Date.now() + path.extname(file.originalname);
-            callback(null, file.originalname+'.'+Date.now()+path.extname(file.originalname));
-        }
-    });
+    
+    
+    // multer.diskStorage({
+    //     destination: function (req, file, callback) {
+    //         callback(null, './uploads');
+    //     },
+    //     filename: function (req, file, callback) {
+    //         var fname = file.fieldname + '-' + Date.now() + path.extname(file.originalname);
+    //         callback(null, file.originalname+'.'+Date.now()+path.extname(file.originalname));
+    //     }
+    // });
+
     var upload_photos = multer({
         storage: storage
     }).array('img', 10);
+
     upload_photos(req, res, function (err) {
         if(err) throw err;
-       console.log(req.files);
+    //    console.log(req.files);
+       console.log(req.body);
     });
 
 })

@@ -68,35 +68,94 @@ var connection = mysql.createConnection({
 app.get("/",(req, res)=>{
     res.render("main");
 })
-
-app.get('/done',(req, res)=>{
-    connection.query(" select image from test_1.photo",(err, result)=>{
+const get_img = async (img_add)=>{
+    let params = { ...pre_params, Key: img_add };
+    const result = await s3.getObject(params,(err, data)=>{
         if(err) throw err;
-        let params = {...pre_params,Key:result[0].image};
-        console.log(params);
-        s3.getObject(params,(err, data)=>{
-            if(err) throw err;
-            res.render("post", { data: `data:image/jpeg;base64, ${btoa(data.Body)}`});
+        return `data:image/jpeg;base64, ${btoa(data.Body)}`;
+    });
+    return result;
+}
+const async_s3 = async (array_img, callback)=>{
+    let new_arr = [];
+    let counter = 1;
+    array_img.forEach((item)=>{
+        new_arr.push(
+            new Promise((resolve)=>{
+                let params = {...pre_params,Key:item};
+                s3.getObject(params,(err, data)=>{
+                    if(err) throw err;
+                    //data_img.push();
+                    resolve(
+                        // { counter : `data:image/jpeg;base64, ${btoa(data.Body)}`});
+                        `data:image/jpeg;base64, ${btoa(data.Body)}`);
+                });
+            })
+            );
+        })
+        Promise.all(new_arr).then((result)=>{
+            callback(result);
         });
+    };
+
+    const test_function = async (item,callback) =>{
+        let params = { ...pre_params, Key: item };
+        s3.getObject(params, (err, data) => {
+            if (err) throw err;
+            callback(`data:image/jpeg;base64, ${btoa(data.Body)}`);
+        });
+    }
+app.get("/photo",(req, res)=>{
+    connection.query(" select * from test_1.photo", (err, result) => {
+        if(result && result.length < 0 && result[0].image_key){
+            let image_key = result[0].image_key.split(",");    
+            async_s3(image_key, (responce) => {
+                res.render("post", { img: responce});
+            });
+        }else {
+            res.render("post")
+        }
+    })
+})
+app.get('/done',(req, res)=>{
+    connection.query(" select * from test_1.photo",(err, result)=>{
+        if(err) throw err;
+        // let params = {...pre_params,Key:result[0].image};
+        // console.log(params);
+        console.log(result);
+
+        if(result && result.length > 0){
+            let image_key = result[0].image_key.split(",");
+            let data_img = [];
+            async_s3(image_key,(responce)=>{
+                // console.log(responce);
+                let title = result[0].title;
+                let head_ar = result[0].head.split("|");
+                let text_ar = result[0].text_array.split("|");
+                let head =[]
+                let text=[];
+                text_ar.forEach((data, index)=>{
+                    let temp = data.split(",");
+                    text.push(temp);
+                })
+                head_ar.forEach((data, index)=>{
+                    let temp = data.split(",");
+                    head.push(temp);
+                });
+                let map = result[0].map.split(",");
+                let obj = {}
+                if(req.xhr)
+                    res.json({title,responce,head,text,map});
+                else {
+                    res.render("post")
+                }
+            });
+        } else {
+            res.render("post");
+        }
     });
 });
 
-
-// const storage = multer.diskStorage({
-//     destination: function (req, file, cb) {
-//         cb(null, './uploads');
-//     },
-//     filename: function (req, file, cb) {
-//         cb(null, file.fieldname+'-'+Date.now()+path.extname(file.originalname))
-//     }
-// })
-
-// const upload = multer({
-//     storage: storage, 
-//     limits: {
-//         fileSize: 1024 * 1024 * 5
-//     }
-// })
 var storage = multerS3({
     s3,
     bucket: process.env.AWS_BUCKET_NAME,
@@ -110,43 +169,52 @@ var storage = multerS3({
 });
 
 app.post("/test",urlencodedParser, (req, res)=>{
-    
-    
-    // multer.diskStorage({
-    //     destination: function (req, file, callback) {
-    //         callback(null, './uploads');
-    //     },
-    //     filename: function (req, file, callback) {
-    //         var fname = file.fieldname + '-' + Date.now() + path.extname(file.originalname);
-    //         callback(null, file.originalname+'.'+Date.now()+path.extname(file.originalname));
-    //     }
-    // });
-
     var upload_photos = multer({
         storage: storage
     }).array('img', 10);
-
+    
     upload_photos(req, res, function (err) {
         if(err) throw err;
-    //    console.log(req.files);
-       console.log(req.body);
+        let pre_q = []
+        req.files.forEach((item)=>{
+            pre_q.push(`${item.key}`);            
+        });
+        let text_arr = []
+        let head_arr = []
+        let body = {...req.body};
+        Object.entries(body).forEach((elem)=>{
+            // console.log(elem);
+            if(elem[0].includes("text_")){
+                let str = elem.join(",")
+                text_arr.push(str);
+            } 
+            if (elem[0].includes("head")){
+                let str = elem.join(",")
+                head_arr.push(str);
+            }
+        })
+        let title = req.body.title;
+        let head = head_arr.join("|");
+        let text = text_arr.join("|")
+        let q = pre_q.join(",");
+        // console.log(req.body);
+        // console.log("q",q);
+        // console.log("text",text);
+        console.log("head",head);
+        // console.log("map",req.body.map);
+        connection.query(
+            "insert into test_1.photo (title, image_key, head, text_array, map) " +
+            "values(?,?,?,?,?);",
+            [title,q,head,text,req.body.map],
+            (err, result)=>{
+                if(err) throw err;
+                // console.log(result);
+                res.redirect("/done")
+            })
+
     });
-
+    
 })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.listen(3000, ()=>{
     console.log("server wired");
     

@@ -16,6 +16,7 @@
         display: flex;
         margin: 0 auto;
         flex-flow: column;
+        padding-top: 30px;
     }
     ul {
         display: grid;
@@ -40,24 +41,32 @@
         padding: 10px;
     }
     a{
-        padding: 5px;
+        padding: 10px;
+        cursor: pointer;
+        border: 1px solid red;
      }
    
 </style>
 <body>
-    <form action="/test" id="form" method="POST" class='1' enctype='multipart/form-data'>
+    <form id="form" method="POST" class='1' enctype='multipart/form-data'>
+        <input type="text" class="title" name="title" placeholder="Enter title">
         <ul class="1" id="1" name="1">
-            <li class="li-text-1">
+            <li class="text_1">
                 <span class="span">X</span>
-                <textarea name="text_1" id="text_1" class="text_1" cols="10" rows="5"></textarea>
+                <textarea name="text_1" id="text" class="text_1" cols="10" rows="5"></textarea>
             </li>
-            <li class="li-file-1">
+            <li class="head_1">
                 <span class="span">X</span>
-                <input name='img_1' class="img_1" type="file">
+                <input name='head_1' class="head_1" id="head" type="text" placeholder="Enter small Header">
+            </li>
+            <li class="file_1">
+                <span class="span">X</span>
+                <input name='img_1' class="img_1" id="img" type="file">
             </li>
         </ul>
-        <a href="#" class="add-photo">Add img</a>
-        <a href="#" class="add-text">Add text</a>
+        <a class="add-photo">Add img</a>
+        <a class="add-header">Add header</a>
+        <a class="add-text">Add text</a>
         <button>Submit</button>
      </form>
 <script src="https://code.jquery.com/jquery-3.4.0.min.js"

@@ -7,19 +7,25 @@
     <title>Document</title>
 </head>
 <style>
-    img {
-        width: 400px;
-        height: 600px;
-        margin-top: 600px;
-        margin-left: 500px;
-    }
+   .root {
+       width: 60vw;
+       height: 100vh;
+       display: grid;
+       justify-content: center;
+       margin: 0 auto;
+       background: gray;
+       padding: 50px;
+   }
+   img {
+       width: 200px;
+       height: 200px;
+       display: block;
+   }
 </style>
 <body>
-
-    <img src ="{{data}}" alt="">
-    
-
+   <div class="root"></div>
     <script src="https://code.jquery.com/jquery-3.4.0.min.js"
         integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
+    <script src="/js.js"></script>
 </body>
 </html>

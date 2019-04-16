@@ -95,9 +95,8 @@ $(document).ready(()=>{
     ul.delegate("li span","click",(e)=>{ 
         let elem = e.currentTarget.parentElement;
         elem.remove();
-        console.log(elem.className);
-        let new_map = map.filter((item)=>!item.includes(elem.className));
-        let new_img_map = image_map.filter(item=> !item.includes(elem.className));
+        let new_map = map.filter((item)=>!item.includes(elem.className));        
+         let new_img_map = image_map.filter(item=> item !== (elem.className));
         image_map = null;
         image_map = [...new_img_map];
         map = null;
@@ -119,29 +118,11 @@ $(document).ready(()=>{
         var input = $("input[type='file']");
         var input_h = $("input[type='text']").not(".title");
         var textarea = $("textarea");     
-        let obj = [];   
-        let images = [];
         $.each(input,(index, value)=>{
             if(value.files && value.files[0]){
                 payload.append("img", value.files[0]);
-                images.push(value.files[0]);
-            } else {
-                images.push({});
             }
         });
-        let t = images.length == image_map.length;
-        console.log("images",images);
-        console.log("image_map",image_map);
-        let i = 0; 
-        while(i < images.length && i < image_map.length){
-            obj.push({
-                key: image_map[i],
-                str: images[i]
-            });
-            console.log(obj);
-            i++;            
-        }
-
         $.each(textarea, (index, val)=>{
             if(val.value.trim() !== ""){
                 payload.append(`${val.name}`, val.value);

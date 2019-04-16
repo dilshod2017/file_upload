@@ -15,7 +15,7 @@ $(document).ready(()=>{
     let input;
     let text_ar;
     let span;
-    let header;
+    let image_map = ["file_1"];
     let map = [
         "text_1",
         "head_1",
@@ -40,8 +40,10 @@ $(document).ready(()=>{
         ul.append(li);
         ul.prop("id",count_c);
         map.push(class_);
+        image_map.push("file_"+count_c);
         console.log("added",class_);
         console.log("map",map);
+        console.log("image_map",image_map);
         
         
      });
@@ -95,9 +97,13 @@ $(document).ready(()=>{
         elem.remove();
         console.log(elem.className);
         let new_map = map.filter((item)=>!item.includes(elem.className));
+        let new_img_map = image_map.filter(item=> !item.includes(elem.className));
+        image_map = null;
+        image_map = [...new_img_map];
         map = null;
         map = [...new_map];
-        // console.log(map);
+        console.log("image_map",image_map);
+        console.log("map",map);
     });
 
 
@@ -112,13 +118,29 @@ $(document).ready(()=>{
         var title = $(".title");
         var input = $("input[type='file']");
         var input_h = $("input[type='text']").not(".title");
-        var textarea = $("textarea");        
+        var textarea = $("textarea");     
+        let obj = [];   
+        let images = [];
         $.each(input,(index, value)=>{
-            if(value.files){
+            if(value.files && value.files[0]){
                 payload.append("img", value.files[0]);
-                // console.log("value",value.files[0]);
+                images.push(value.files[0]);
+            } else {
+                images.push({});
             }
         });
+        let t = images.length == image_map.length;
+        console.log("images",images);
+        console.log("image_map",image_map);
+        let i = 0; 
+        while(i < images.length && i < image_map.length){
+            obj.push({
+                key: image_map[i],
+                str: images[i]
+            });
+            console.log(obj);
+            i++;            
+        }
 
         $.each(textarea, (index, val)=>{
             if(val.value.trim() !== ""){
@@ -129,10 +151,10 @@ $(document).ready(()=>{
             if(val.value.trim() !== ""){
                 payload.append(`${val.name}`, val.value);
             }
-        })
-        
+        });     
  
         payload.append("title", title.val());
+        payload.append("image_map",image_map);
         payload.append("map",map);
         $.ajax({
             url: '/test',
@@ -142,7 +164,7 @@ $(document).ready(()=>{
             processData: false,
             success: function (data) {
                 // console.log("data");
-                window.location.href = "/done"
+                // window.location.href = "/done"
             }
         });
         event.preventDefault();

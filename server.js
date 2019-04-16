@@ -122,16 +122,24 @@ app.get('/done',(req, res)=>{
         if(err) throw err;
         // let params = {...pre_params,Key:result[0].image};
         // console.log(params);
-        console.log(result);
+        // console.log(result);
 
         if(result && result.length > 0){
             let image_key = result[0].image_key.split(",");
             let data_img = [];
             async_s3(image_key,(responce)=>{
                 // console.log(responce);
-                let title = result[0].title;
-                let head_ar = result[0].head.split("|");
-                let text_ar = result[0].text_array.split("|");
+                let title;
+                let head_ar;
+                let text_ar;
+                let map;
+                if(result[0].title)
+                    title = result[0].title;
+                if(result[0].head)
+                    head_ar = result[0].head.split("|");
+                if(result[0].text_array)
+                    text_ar = result[0].text_array.split("|");
+
                 let head =[]
                 let text=[];
                 text_ar.forEach((data, index)=>{
@@ -142,7 +150,8 @@ app.get('/done',(req, res)=>{
                     let temp = data.split(",");
                     head.push(temp);
                 });
-                let map = result[0].map.split(",");
+                if(result[0].map)
+                    map = result[0].map.split(",");
                 let obj = {}
                 if(req.xhr)
                     res.json({title,responce,head,text,map});
@@ -200,7 +209,7 @@ app.post("/test",urlencodedParser, (req, res)=>{
         // console.log(req.body);
         // console.log("q",q);
         // console.log("text",text);
-        console.log("head",head);
+        // console.log("head",head);
         // console.log("map",req.body.map);
         connection.query(
             "insert into test_1.photo (title, image_key, head, text_array, map) " +
